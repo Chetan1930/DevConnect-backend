@@ -46,7 +46,7 @@ This is the backend authentication server built with **Node.js**, **Express**, *
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/chetan1930/auth-backend.git
+   git clone https://github.com/Chetan1930/DevConnect-backend.git
    cd auth-backend
 ````
 

@@ -5,13 +5,12 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const cors = require("cors"); 
-
 const app = express();
 
 
 const authroute=require("./routes/authRoutes");
 // Passport 
-require("./config/passport")(passport);
+require("./config/passport");
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -28,7 +27,7 @@ app.use(session({
 
 // Initialize passport
 app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.session());
 
 // Routes
 app.use("/api/auth", authroute);
