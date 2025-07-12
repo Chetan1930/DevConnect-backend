@@ -10,8 +10,8 @@ const app = express();
 
 
 const authroute=require("./routes/authRoutes");
-// Passport config
-// require("./config/passport")(passport);
+// Passport 
+require("./config/passport")(passport);
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -27,7 +27,7 @@ app.use(session({
 }));
 
 // Initialize passport
-// app.use(passport.initialize());
+app.use(passport.initialize());
 // app.use(passport.session());
 
 // Routes
