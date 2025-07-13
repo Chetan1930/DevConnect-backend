@@ -31,5 +31,16 @@ router.post('/login', (req, res, next) => {
     })(req, res, next);
 });
 
+router.get('/auth/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+router.get('/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login',
+    successRedirect: '/dashboard' // OR send token/client redirect from here
+  })
+);
+
+
 
 module.exports = router;
