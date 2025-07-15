@@ -1,8 +1,9 @@
 const route = require('express').Router();
-const { protectRoute } = require('../middleware/protectRoute');
+const {ensureAuth} = require('../middleware/protectRoute.js');
+console.log("typeof ensureAuth:", typeof ensureAuth);
 const Profile = require("../models/profile");
 
-route.post('/', protectRoute , async (req, res) => {
+route.post('/', ensureAuth , async (req, res) => {
   const { bio, skills, github, linkedin, avatar } = req.body;
   const userId = req.user._id;
 

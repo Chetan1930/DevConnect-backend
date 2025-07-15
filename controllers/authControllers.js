@@ -46,17 +46,17 @@ exports.login = async (req, res) => {
     if (!isValidPass) return res.status(401).json({ message: "Invalid credentials" });
 
     // Create tokens
-    const accessToken = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
-      process.env.SECRET_JWT,
-      { expiresIn: "1d" }
-    );
+    // const accessToken = jwt.sign(
+    //   { userId: user._id, username: user.username, role: user.role },
+    //   process.env.SECRET_JWT,
+    //   { expiresIn: "1d" }
+    // );
 
-    const refreshToken = jwt.sign(
-      { userId: user._id, username: user.username },
-      process.env.SECRET_JWT_REFRESH,
-      { expiresIn: "7d" }
-    );
+    // const refreshToken = jwt.sign(
+    //   { userId: user._id, username: user.username },
+    //   process.env.SECRET_JWT_REFRESH,
+    //   { expiresIn: "7d" }
+    // );
 
     // Optional: send refreshToken as cookie
     res.cookie("token", refreshToken, {

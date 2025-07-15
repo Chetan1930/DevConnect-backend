@@ -1,4 +1,4 @@
-const { protectRoute } = require('../middleware/protectRoute');
+const { protectRoute } = require('../middleware/protectRoute.js');
 
 const route = require('express').Router();
 
