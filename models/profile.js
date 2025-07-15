@@ -10,7 +10,7 @@ const profileSchema = new mongoose.Schema({
     bio: {
         type: String,
         trim: true,
-        maxlength: 300,
+        maxlength: 300, // this is something jiska merko phele nhi pta tha...ek aur new chij add hui h knowledge mei 
         default: ''
     },
     skills: {

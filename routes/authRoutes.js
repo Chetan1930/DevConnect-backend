@@ -18,6 +18,7 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ username, email, password: hashed });
 
     const token = generateToken(user);
+    console.log("register ka token",token);
     res.status(201).json({ token, user });
 });
 
@@ -27,6 +28,7 @@ router.post('/login', (req, res, next) => {
         if (err || !user) return res.status(401).json({ message: info?.message || 'Login failed' });
 
         const token = generateToken(user);
+        console.log(token);
         res.status(200).json({ token, user });
     })(req, res, next);
 });

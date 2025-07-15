@@ -34,6 +34,7 @@ app.use(passport.session());
 // Routes
 app.use("/api/auth", authroute);
 app.use("/api/profile",profileRoute)
+app.use("/", require('./routes/Chekauth'));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

@@ -1,9 +1,12 @@
 const jwt = require('jsonwebtoken');
 
-function protectRoute(req, res, next) {
-    const authHeader = req.headers.authorization;
+exports.protectRoute = (req, res, next)=> {
+    const authHeader = req.headers['authorization'];
 
-    if (!authHeader || !authHeader.startsWith('Bearer '))
+    console.log("protec route run kr toh rha h ");
+    console.log(authHeader);
+
+    if (!authHeader)
         return res.status(401).json({ message: 'No token' });
 
     const token = authHeader.split(' ')[1];
