@@ -1,14 +1,8 @@
-const { protectRoute } = require('../middleware/protectRoute.js');
+const { ensureAuth } = require('../middleware/protectRoute.js');
+const router = require('express').Router();
 
-const route = require('express').Router();
-
-
-
-route.get('/',protectRoute ,(req,res)=>{
-    res.send("<h1>App Login kre hue Route ke Ander ho Bhai</h1>");
+router.get('/', ensureAuth, (req, res) => {
+  res.send("<h1>App Login ke baad Protected Route ke andar ho bhai 👊</h1>");
 });
 
-
-
-
-module.exports = route;
+module.exports = router;
