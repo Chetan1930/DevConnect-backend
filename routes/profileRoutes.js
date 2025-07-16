@@ -1,6 +1,5 @@
 const route = require('express').Router();
 const {ensureAuth} = require('../middleware/protectRoute.js');
-console.log("typeof ensureAuth:", typeof ensureAuth);
 const Profile = require("../models/profile");
 
 route.post('/', ensureAuth , async (req, res) => {
@@ -42,7 +41,12 @@ route.post('/', ensureAuth , async (req, res) => {
 route.get('/:id', async (req, res) => {
   try {
     const profile = await Profile.findOne({ userId: req.params.id }).populate('userId', 'username email');
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    if (!profile) {
+      return res.status(404).json({
+        message: 'Profile not created yet. Would you like to create one?',
+        createPrompt: true // 👈 frontend can check this
+      });
+    }
     res.status(200).json(profile);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
