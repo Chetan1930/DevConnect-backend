@@ -4,12 +4,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const flash = require('connect-flash');
 const cors = require("cors"); 
 const app = express();
 
 //Routes imporint bhai shab...
 const authroute=require("./routes/authRoutes");
 const profileRoute = require('./routes/profileRoutes');
+const blogRoute = require('./routes/blogRoutes');
 
 // Passport 
 require("./config/passport");
@@ -17,6 +19,7 @@ require("./config/passport");
 // Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
+app.use(flash());
 app.use(express.urlencoded({ extended: false }));
 
 // Express session
@@ -38,6 +41,8 @@ app.use(passport.session());
 // Routes
 app.use("/api/auth", authroute);
 app.use("/api/profile",profileRoute)
+app.use('/api/blog', blogRoute);
+
 app.use("/", require('./routes/Chekauth'));
 
 mongoose.connect(process.env.MONGO_URI)
