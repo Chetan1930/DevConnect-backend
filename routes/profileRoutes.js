@@ -44,7 +44,7 @@ route.get('/:id', async (req, res) => {
     if (!profile) {
       return res.status(404).json({
         message: 'Profile not created yet. Would you like to create one?',
-        createPrompt: true // 👈 frontend can check this
+        createPrompt: true 
       });
     }
     res.status(200).json(profile);
