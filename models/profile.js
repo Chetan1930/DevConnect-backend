@@ -10,7 +10,7 @@ const profileSchema = new mongoose.Schema({
     bio: {
         type: String,
         trim: true,
-        maxlength: 300, // this is something jiska merko phele nhi pta tha...ek aur new chij add hui h knowledge mei 
+        maxlength: 300,  
         default: ''
     },
     skills: {
@@ -33,7 +33,7 @@ const profileSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        default: 'https://www.gravatar.com/avatar/placeholder',
+        default: 'https://i.pinimg.com/736x/36/ae/a4/36aea442f9694a4df7aff88f1d6c28f6.jpg',
     }
 }, {
     timestamps: true

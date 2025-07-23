@@ -1,9 +1,11 @@
 const route = require('express').Router();
 const {ensureAuth} = require('../middleware/protectRoute.js');
+const parser = require('../middlewares/multer');
 const Profile = require("../models/profile");
 
-route.post('/', ensureAuth , async (req, res) => {
-  const { bio, skills, github, linkedin, avatar } = req.body;
+route.post('/' , ensureAuth ,  parser.single('avatar')  , async (req, res) => {
+  const { bio, skills, github, linkedin } = req.body;
+  const avatar = req.file?.path;
   const userId = req.user._id;
 
   try {
