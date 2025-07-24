@@ -49,10 +49,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // --- Routes ---
+app.use("/", require("./routes/Chekauth"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/profile", require("./routes/profileRoutes"));
 app.use("/api/blog", require("./routes/blogRoutes"));
-app.use("/", require("./routes/Chekauth"));
+app.use("/api/blogs", require("./routes/likeAnsComment"));
 
 // --- Socket.IO Events ---
 io.on("connection", (socket) => {

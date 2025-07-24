@@ -8,7 +8,7 @@ const blogSchema = new mongoose.Schema({
         trim: true,
         maxlength: 50,
     },
-    image: {
+    image: {   
         type: String,
     },    
     writer: {
