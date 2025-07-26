@@ -4,12 +4,12 @@ const likeSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Make sure your User model name matches this
+      ref: "User", 
       required: true,
     },
     blog: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Blog", // Make sure your Blog model name matches this
+      ref: "Blog", 
       required: true,
     },
   },

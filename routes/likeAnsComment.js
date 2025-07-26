@@ -1,15 +1,22 @@
 const router = require('express').Router();
-// POST /api/blogs/:id/like
+
+
 const Like = require("../models/likes");
 const Comment = require("../models/comment");
 const { ensureAuth } = require('../middleware/protectRoute');
 
-router.post("/like/:blogId", ensureAuth , async (req, res) => {
+
+// router.get('/', (req,res)=>{
+//   res.json({message:"bhai ye toh properly work kr rha h"});
+// })
+
+router.post("/:blogid/like" , async (req, res) => {
     console.log("yha backend se bhi like ka function run kr rh h ");
-  try {
     const { blogId } = req.params;
     const userId = req.user._id;
-
+    console.log(userId);
+    console.log(blogId);
+  try {
     const existingLike = await Like.findOne({ blog: blogId, user: userId });
 
     if (existingLike) {
@@ -26,7 +33,7 @@ router.post("/like/:blogId", ensureAuth , async (req, res) => {
 
 
 // POST /api/blogs/:id/comment
-router.post("/:id/comment", ensureAuth, async (req, res) => {
+router.post("/:id/comment", async (req, res) => {
     const blogId = req.params.id;
     const userId = req.user._id;
     const { text } = req.body;
