@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Blog = require('../models/blog');
 const parser = require('../middlewares/multer');
-const { ensureAuth } = require('../middleware/protectRoute');
+const { ensureAuth } = require('../middlewares/protectRoute');
 
 // Create a new blog
 router.post('/create', parser.single('image'), ensureAuth, async (req, res) => {

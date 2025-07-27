@@ -16,7 +16,7 @@ const likeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Compound index to prevent duplicate likes
+// Prevent duplicate likes
 likeSchema.index({ user: 1, blog: 1 }, { unique: true });
 
 module.exports = mongoose.model('Like', likeSchema);

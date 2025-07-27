@@ -1,5 +1,5 @@
 const route = require('express').Router();
-const {ensureAuth} = require('../middleware/protectRoute.js');
+const {ensureAuth} = require('../middlewares/protectRoute.js');
 const parser = require('../middlewares/multer');
 const Profile = require("../models/profile");
 
