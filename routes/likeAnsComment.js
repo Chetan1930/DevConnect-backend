@@ -7,33 +7,28 @@ const Blog = require("../models/blog"); // Make sure you have this model
 
 // ✅ Like or Unlike a blog post — returns current like status & count
 
-router.get('/', (req,res)=>{
-  res.send("sb shi chl rha h ");
-})
-router.post("/:blogid/like", ensureAuth, async (req, res) => {
-  const blogId = req.params.blogid;
+router.post("/:blogId/like", ensureAuth, async (req, res) => {
+  const { blogId } = req.params;
   const userId = req.user._id;
 
   try {
-    const existingLike = await Like.findOne({ blog: blogId, user: userId });
+    const existing = await Like.findOne({ user: userId, blog: blogId });
 
-    let liked;
-    if (existingLike) {
-      await existingLike.deleteOne(); // Unlike
-      liked = false;
+    if (existing) {
+      await Like.deleteOne({ _id: existing._id });
     } else {
-      await Like.create({ blog: blogId, user: userId }); // Like
-      liked = true;
+      await Like.create({ user: userId, blog: blogId });
     }
 
-    const likeCount = await Like.countDocuments({ blog: blogId });
+    const totalLikes = await Like.countDocuments({ blog: blogId });
+    const liked = !existing;
 
-    res.json({ liked, likeCount });
+    return res.status(200).json({ liked, count: totalLikes });
   } catch (err) {
-    console.error("Like Error:", err);
-    res.status(500).json({ message: "Server error during like/unlike" });
+    return res.status(500).json({ error: "Failed to toggle like" });
   }
 });
+
 
 // ✅ Post a new comment to a blog
 router.post("/:id/comment", ensureAuth, async (req, res) => {
@@ -60,6 +55,23 @@ router.post("/:id/comment", ensureAuth, async (req, res) => {
   }
 });
 
+// Get all liked of a  blog post 
+
+router.get("/:blogId/like", ensureAuth, async (req, res) => {
+  const { blogId } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const likeCount = await Like.countDocuments({ blog: blogId });
+    const likedByUser = await Like.exists({ blog: blogId, user: userId });
+
+    return res.status(200).json({ likeCount, likedByUser: !!likedByUser });
+  } catch (err) {
+    console.error("Fetch Like Info Error:", err);
+    return res.status(500).json({ error: "Failed to fetch like info" });
+  }
+});
+
 // ✅ Get all comments of a blog post
 router.get("/:id/comments", ensureAuth, async (req, res) => {
   const blogId = req.params.id;
@@ -73,42 +85,6 @@ router.get("/:id/comments", ensureAuth, async (req, res) => {
   } catch (err) {
     console.error("Fetch Comments Error:", err);
     res.status(500).json({ message: "Server error fetching comments" });
-  }
-});
-
-// @route   GET /blogs/:id
-// @desc    Get single blog with likeCount and likedByUser
-// @access  Private (or Public if you drop ensureAuth)
-
-router.get("/:id", ensureAuth, async (req, res) => {
-  try {
-    const blogId = req.params.id;
-
-    // Find the blog and populate author
-    const blog = await Blog.findById(blogId)
-      .populate("author", "name email") // Populate author fields as needed
-      .lean();
-
-    if (!blog) {
-      return res.status(404).json({ message: "Blog not found" });
-    }
-
-    // Count likes for this blog
-    const likeCount = await Like.countDocuments({ blog: blogId });
-
-    // Check if the current user has liked this blog
-    const likedByUser = await Like.exists({
-      blog: blogId,
-      user: req.user._id,
-    });
-    res.status(200).json({
-      ...blog,
-      likeCount,
-      likedByUser: !!likedByUser, 
-    });
-  } catch (err) {
-    console.error("Error fetching blog:", err);
-    res.status(500).json({ message: "Server error fetching blog" });
   }
 });
 
