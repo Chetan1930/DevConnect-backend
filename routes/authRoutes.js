@@ -2,7 +2,6 @@ const express = require('express');
 const passport = require('passport');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
-const { ensureAuth } = require('../middlewares/protectRoute');
 
 const router = express.Router();
 
@@ -12,12 +11,23 @@ router.post('/register', async (req, res) => {
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: 'Email already in use' });
+    if (userExists) return res.status(409).json({ 
+  success: false, 
+  message: "Email already registered" 
+});
 
     const hashed = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username, email, password: hashed });
 
-    res.status(201).json({ message: 'User registered successfully' });
+    if(!newUser) return res.status(422).json({
+  success: false,
+  errors: {
+    email: { message: "Invalid email format" },
+    password: { message: "Password must be at least 6 characters" }
+  }
+});
+
+    res.status(200).json({success: true, message: 'User registered successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
