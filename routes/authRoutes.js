@@ -34,6 +34,13 @@ router.post('/register', async (req, res) => {
 });
 
 // LOGIN (Passport Local Strategy, session-based)
+
+router.get('/github', (req,res)=>{
+  res.send("<h1>this feature will comming soon!</h2>")
+})
+router.get('/google', (req,res)=>{
+  res.send("<h1>this feature will comming soon!</h2>")
+})
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
@@ -48,12 +55,12 @@ router.post('/login', (req, res, next) => {
 });
 
 // Google OAuth Route
-router.get('/auth/google',
+router.post('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
 // Google OAuth Callback
-router.get('/auth/google/callback',
+router.post('/auth/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/login',
   }),

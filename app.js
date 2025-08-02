@@ -71,6 +71,7 @@ app.use("/api/profile", require("./routes/profileRoutes"));
 app.use("/api/blog", require("./routes/blogRoutes"));
 app.use("/api/blogs", require("./routes/likeAnsComment"));
 
+
 // --- Socket.IO Events ---
 io.on("connection", (socket) => {
   console.log("⚡ User connected");
