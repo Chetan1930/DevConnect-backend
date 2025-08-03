@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const { ensureAuth } = require('../middlewares/protectRoute');
 
 const router = express.Router();
 
@@ -85,5 +86,25 @@ router.get('/me', (req, res) => {
     res.status(401).json({ message: 'Not logged in' });
   }
 });
+
+router.get('/users', ensureAuth, async (req, res) => {
+  try {
+    const userList = await User.find({}, 'username'); // optionally project only username
+
+    if (!userList || userList.length === 0) {
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    return res.status(200).json({
+      userList,
+      message: "Users fetched successfully",
+    });
+  } catch (error) {
+    console.error("Server error while fetching users:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 
 module.exports = router;
