@@ -9,7 +9,7 @@ const cors = require("cors");
 const http = require("http");
 const parser = require("./middlewares/multer");
 const { Server } = require("socket.io");
-const User = require("./models/User");
+const User = require("./models/user");
 const Message = require("./models/msg");
 const PrivateMessage = require("./models/PrivateMessage");
 
