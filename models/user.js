@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema({
         enum:['user','admin'],
         default:'user',
     },
+    followers:{
+        type:String,
+        type: mongoose.Schema.Types.ObjectId,
+              ref: 'Blog',
+              required: true,
+    },
 
     password:{
         type:String,
