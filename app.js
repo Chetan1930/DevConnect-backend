@@ -7,28 +7,24 @@ const passport = require("passport");
 const flash = require("connect-flash");
 const cors = require("cors");
 const http = require("http");
-const parser = require('./middlewares/multer');
+const parser = require("./middlewares/multer");
 const { Server } = require("socket.io");
-const Message = require('./models/msg');
+const User = require("./models/User");
+const Message = require("./models/msg");
+const PrivateMessage = require("./models/PrivateMessage");
 
 // Create app and server
 const app = express();
 const server = http.createServer(app);
-
-// --- Socket.IO Configuration ---
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
-});
 
 // --- Middleware ---
 const allowedOrigins = [
   "http://localhost:5173",
   "https://devconnect571.netlify.app",
   "https://devconnect71.netlify.app",
-];
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -46,18 +42,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
 // --- Session Configuration ---
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: false, // Use true in production with HTTPS
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-    },
-  })
-);
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24,
+  },
+});
+
+app.use(sessionMiddleware);
 
 // --- Passport Config ---
 require("./config/passport");
@@ -71,35 +67,124 @@ app.use("/api/profile", require("./routes/profileRoutes"));
 app.use("/api/blog", require("./routes/blogRoutes"));
 app.use("/api/blogs", require("./routes/likeAnsComment"));
 
+// --- Socket.IO Configuration ---
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
 
-// --- Socket.IO Events ---
-io.on("connection", (socket) => {
-  console.log("⚡ User connected");
+// Share session middleware with Socket.IO
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+});
 
-  // Send all previous messages to new client
-  Message.find().sort({ timestamp: -1 }).limit(100).sort({ timestamp: 1 })
-.then((messages) => {
-    socket.emit("message_history", messages);
+// Authenticate using Passport session
+io.use((socket, next) => {
+  if (socket.request.session.passport?.user) {
+    socket.userId = socket.request.session.passport.user;
+    next();
+  } else {
+    console.log("Unauthenticated socket connection");
+    next(new Error("Authentication error"));
+  }
+});
 
+const onlineUsers = new Map(); // socketId -> userId
+
+io.on("connection", async (socket) => {
+  console.log("⚡ User connected:", socket.userId);
+  onlineUsers.set(socket.id, socket.userId);
+
+  // Send list of online user IDs
+  io.emit("online_users", Array.from(new Set(onlineUsers.values())));
+
+  // PUBLIC chat history
+  socket.on("request_message_history", async () => {
+    const history = await Message.find()
+      .sort({ timestamp: 1 })
+      .lean();
+    const withUsername = await Promise.all(
+      history.map(async (m) => {
+        const user = await User.findById(m.userId).lean();
+        return { ...m, username: user?.username || "Unknown" };
+      })
+    );
+    socket.emit("message_history", withUsername);
   });
 
-   socket.on("send_message", async (data) => {
-    try {
-      const newMessage = new Message({
-        text: data.text,
-        username: data.username,
-        timestamp: data.timestamp,
-      });
+  // PUBLIC send message
+  socket.on("send_message", async (msg) => {
+    const newMsg = new Message({
+      userId: socket.userId,
+      text: msg.text,
+      timestamp: new Date()
+    });
+    await newMsg.save();
 
-      await newMessage.save();
-      io.emit("receive_message", newMessage); // broadcast to all
-    } catch (err) {
-      console.error("Error saving message:", err);
+    const user = await User.findById(socket.userId).lean();
+    io.emit("receive_message", {
+      username: user.username,
+      text: msg.text,
+      timestamp: newMsg.timestamp
+    });
+  });
+
+  // PRIVATE history request
+  socket.on("request_private_message_history", async ({ toUserId }) => {
+    const history = await PrivateMessage.find({
+      $or: [
+        { from: socket.userId, to: toUserId },
+        { from: toUserId, to: socket.userId }
+      ]
+    })
+      .sort({ timestamp: 1 })
+      .lean();
+
+    const withUsername = await Promise.all(
+      history.map(async (m) => {
+        const user = await User.findById(m.from).lean();
+        return {
+          username: user?.username || "Unknown",
+          text: m.text,
+          timestamp: m.timestamp
+        };
+      })
+    );
+
+    socket.emit("private_message_history", withUsername);
+  });
+
+  // PRIVATE send
+  socket.on("private_message", async ({ toUserId, message }) => {
+    const newMsg = new PrivateMessage({
+      from: socket.userId,
+      to: toUserId,
+      text: message.text,
+      timestamp: new Date()
+    });
+    await newMsg.save();
+
+    // Send to recipient if online
+    for (const [sockId, uid] of onlineUsers) {
+      if (uid.toString() === toUserId.toString()) {
+        io.to(sockId).emit("private_message", {
+          from: socket.userId,
+          message: {
+            username: (await User.findById(socket.userId).lean()).username,
+            text: message.text,
+            timestamp: newMsg.timestamp
+          }
+        });
+      }
     }
   });
 
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected");
+    console.log("❌ User disconnected:", socket.userId);
+    onlineUsers.delete(socket.id);
+    io.emit("online_users", Array.from(new Set(onlineUsers.values())));
   });
 });
 
