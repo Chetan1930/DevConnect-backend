@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MongoStore = require('connect-mongo');
 const passport = require("passport");
 const flash = require("connect-flash");
 const cors = require("cors");
@@ -46,6 +47,10 @@ const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions'
+  }),
   cookie: {
     httpOnly: true,
     secure: false,
