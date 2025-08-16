@@ -21,7 +21,6 @@ const server = http.createServer(app);
 // --- Middleware ---
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://devconnect571.netlify.app",
   "https://devconnect71.netlify.app",
   process.env.CLIENT_URL
 ].filter(Boolean);
@@ -76,6 +75,7 @@ app.use("/api/blogs", require("./routes/likeAnsComment"));
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
